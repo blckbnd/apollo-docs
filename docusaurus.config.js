@@ -9,7 +9,7 @@ const config = {
   title: 'Apollo Docs',
   tagline: 'Documentation for Apollo',
   url: 'https://blckbnd.github.io/apollo-docs',
-  baseUrl: '/',
+  baseUrl: '/apollo-docs/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
