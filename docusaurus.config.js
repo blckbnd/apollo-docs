@@ -8,7 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Apollo Docs',
   tagline: 'Documentation for Apollo',
-  url: 'https://blckbnd.github.io/apollo-docs',
+  url: 'https://blckbnd.github.io',
   baseUrl: '/apollo-docs/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
