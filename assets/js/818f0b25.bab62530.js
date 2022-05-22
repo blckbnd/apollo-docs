@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkapollo_docs=self.webpackChunkapollo_docs||[]).push([[620],{5024:function(e){e.exports=JSON.parse('{"title":"Schema","slug":"/category/schema","permalink":"/category/schema","navigation":{"previous":{"title":"Apollo","permalink":"/"},"next":{"title":"Schema Examples","permalink":"/schema/schema-examples"}}}')}}]);
