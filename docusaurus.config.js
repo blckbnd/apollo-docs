@@ -8,7 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Apollo Docs',
   tagline: 'Documentation for Apollo',
-  url: 'https://apollo-docs.github.io',
+  url: 'https://blckbnd.github.io/apollo-docs',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -17,7 +17,7 @@ const config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'blckbnd', // Usually your GitHub org/user name.
-  projectName: 'apollo-docs.github.io', // Usually your repo name.
+  projectName: 'apollo-docs', // Usually your repo name.
   deploymentBranch: 'gh-pages',
 
   // Even if you don't use internalization, you can use this field to set useful
