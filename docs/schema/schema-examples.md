@@ -24,6 +24,31 @@ contract usdc_to_eth_swaps "0x905dfCD5649217c42684f23958568e533C711Aa3" {
     size = amount1In != 0 ? parse_decimals(amount1In, 6) : parse_decimals(amount1Out, 6)
   }
 }
+
+```
+### Record every ERC20 transfer, and parse the value
+```hcl
+event Transfer {
+  abi = "erc20.abi.json"
+
+  // The outputs we're interested in, same way as with methods.
+  outputs = ["from", "to", "value"]
+
+  method decimals {
+    outputs = ["decimals"]
+  }
+
+  save {
+    timestamp = timestamp
+    block = blocknumber
+    contract = contract_address
+    tx_hash = tx_hash
+
+    sender = from
+    receiver = to
+    value = parse_decimals(value, decimals)
+  }
+}
 ```
 ## Methods
 ### Calculate the mid price of a Uniswap V2 pool
