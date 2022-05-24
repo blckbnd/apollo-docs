@@ -3,6 +3,18 @@ sidebar_position: 2
 ---
 # Getting Started
 ## Installation
+### Debian-based Linux
+Install with `apt`:
+```bash
+sudo apt-get install apollo
+```
+
+### MacOS
+TODO
+
+### Windows
+TODO
+
 ## Setting up
 First, generate the config directory and files:
 ```
