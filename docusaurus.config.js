@@ -59,7 +59,7 @@ const config = {
         title: 'Apollo Docs',
         logo: {
           alt: 'My Site Logo',
-          src: 'img/logo.png',
+          src: 'img/logo.svg',
         },
         items: [
           {
