@@ -41,7 +41,10 @@ const config = {
           // editUrl:
           //   'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
-        blog: false,
+        blog: {
+          blogTitle: 'Apollo blog',
+          postsPerPage: 'ALL',
+        },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
@@ -58,13 +61,11 @@ const config = {
           alt: 'My Site Logo',
           src: 'img/logo.png',
         },
-        // items: [
-        //   {
-        //     href: 'https://github.com/defi-repo-jbfm/apollo-docs',
-        //     label: 'GitHub',
-        //     position: 'right',
-        //   },
-        // ],
+        items: [
+          {
+            to: 'blog', label: 'Blog', position: 'left'
+          },
+        ],
       },
       footer: {
         style: 'dark',
@@ -109,7 +110,7 @@ const config = {
           //   ],
           // },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Blockbound, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Chainbound, Inc. Built with Docusaurus.`,
       },
       prism: {
         theme: lightCodeTheme,
