@@ -9,111 +9,155 @@ calculate the mid price before the swap. Note that events are at the transaction
 while calling methods is at the block level (the state we get is the state at the end
 of the target block).
 ```hcl
-contract usdc_to_eth_swaps "0x905dfCD5649217c42684f23958568e533C711Aa3" {
-  abi = "unipair.abi.json"
-  // Listen for events
-  event Swap {
-    // The outputs we're interested in, same way as with methods.
-    outputs = ["amount1In", "amount0Out", "amount0In", "amount1Out"]
+// query defines the name of your query -> name of your output files and SQL tables
+query usdc_eth_swaps {
+  chain = "arbitrum"
 
-    method getReserves {
-      // Call at the previous block
-      block_offset = -1
-      // These are the outputs we're interested in. They are available 
-      // to transform as variables in the "save" block below. Outputs should
-      // be provided as a list.
-      outputs = ["_reserve0", "_reserve1"]
+  // specify the contract address
+  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+    // contract needs an ABI
+    abi = "unipair.abi.json"
+
+    // Listen for events
+    event Swap {
+      // The outputs we're interested in, same way as with methods.
+      outputs = ["amount1In", "amount0Out", "amount0In", "amount1Out"]
+
+      // We can call methods on the occurence of the Swap event
+      method getReserves {
+        // Call at the previous block
+        block_offset = -1
+        // These are the outputs we're interested in. They are available 
+        // to transform as variables in the "transform" block below. Outputs should
+        // be provided as a list.
+        outputs = ["_reserve0", "_reserve1"]
+      }
+    }
+
+    // "transform" blocks are at the contract-level,
+    // they allow you to do some preliminary cleaning of the outputs
+    // before moving on.
+    transform {
+      eth_reserve = parse_decimals(_reserve0, 18)
+      usdc_reserve = parse_decimals(_reserve1, 6)
+
+      usdc_sold = parse_decimals(amount1In, 6)
+      eth_sold = parse_decimals(amount0In, 18)
+
+      usdc_bought = parse_decimals(amount1Out, 6)
+      eth_bought = parse_decimals(amount0Out, 18)
+
+      buy = amount0Out != 0
     }
   }
 
   // Besides the normal context, the "save" block for events provides an additional
-  // variable "tx_hash".
+  // variable "tx_hash". "save" blocks are at the query-level and have access to variables
+  // defined in the "transform" block
   save {
     timestamp = timestamp
     block = blocknumber
     contract = contract_address
     tx_hash = tx_hash
 
-    eth_reserve = parse_decimals(_reserve0, 18)
-    usdc_reserve = parse_decimals(_reserve1, 6)
-    mid_price = parse_decimals(_reserve1, 6) / parse_decimals(_reserve0, 18)
+    eth_reserve = eth_reserve
+    usdc_reserve = usdc_reserve
+    mid_price = usdc_reserve / eth_reserve
 
     // Example: we want to calculate the price of the swap.
     // We have to make sure we don't divide by 0, so we use the ternary operator.
-    price = amount0Out != 0 ? (parse_decimals(amount1In, 6) / parse_decimals(amount0Out, 18)) : (parse_decimals(amount1Out, 6) / parse_decimals(amount0In, 18))
-    dir = amount0Out != 0 ? upper("buy") : upper("sell")
-    size = amount1In != 0 ? parse_decimals(amount1In, 6) : parse_decimals(amount1Out, 6)
+    swap_price = eth_bought != 0 ? (usdc_sold / eth_bought) : (usdc_bought / eth_sold)
+    direction = buy ? b : s
+    size_in_udsc = eth_bought != 0 ? usdc_sold : usdc_bought
   }
 }
 ```
 ### Record every ERC20 transfer, and parse the value
 ```hcl
-event Transfer {
-  abi = "erc20.abi.json"
+query arbitrum_transfers {
+  chain = "arbitrum"
 
-  // The outputs we're interested in, same way as with methods.
-  outputs = ["from", "to", "value"]
+  event Transfer {
+    abi = "erc20.abi.json"
 
-  method decimals {
-    outputs = ["decimals"]
+    outputs = [
+      "from",
+      "to",
+      "value"
+    ]
+
+    // Because it could be any ERC20 transfer, we don't
+    // know the decimals in advance and need to call them.
+    // The code would somehow need to know that it should call this on
+    // the contract that emitted the event.
+    method decimals {
+      outputs = ["decimals"]
+    }
+
+
+    transform {
+      amount_parsed = parse_decimals(value, decimals)
+    }
   }
 
   save {
-    timestamp = timestamp
-    block = blocknumber
-    contract = contract_address
-    tx_hash = tx_hash
-
     sender = from
     receiver = to
-    value = parse_decimals(value, decimals)
+    amount = amount_parsed
   }
 }
 ```
 ## Methods
 ### Calculate the mid price of a Uniswap V2 pool
 ```hcl
-contract usdc_eth_reserves "0x905dfCD5649217c42684f23958568e533C711Aa3" {
-  abi = "unipair.abi.json"
+query usdc_eth_mid_price {
+  chain = "arbitrum"
 
-  // Call methods
-  method getReserves {
-    // These are the outputs we're interested in. They are available 
-    // to transform as variables in the "save" block below. Outputs should
-    // be provided as a list.
-    outputs = ["_reserve0", "_reserve1"]
+  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+    abi = "unipair.abi.json"
+
+    // Call methods
+    method getReserves {
+      // These are the outputs we're interested in. They are available 
+      // to transform as variables in the "save" block below. Outputs should
+      // be provided as a list.
+      outputs = ["_reserve0", "_reserve1"]
+    }
+
+
+    transform {
+      eth_reserve = parse_decimals(_reserve0, 18)
+      usdc_reserve = parse_decimals(_reserve1, 6)
+    }
   }
 
   save {
-    timestamp = timestamp
     block = blocknumber
-    contract = contract_address
-    eth_reserve = parse_decimals(_reserve0, 18)
-    usdc_reserve = parse_decimals(_reserve1, 6)
-
-    // Example: we want to calculate the mid price from the 2 reserves.
-    // Cannot reuse variables that are defined in the same "save" block.
-    // We have to reuse variables that were defined in advance, i.e.
-    // in "inputs" or "outputs"
-    mid_price = parse_decimals(_reserve1, 6) / parse_decimals(_reserve0, 18)
+    timestamp = timestamp
+    mid_price = usdc_reserve / eth_reserve
   }
 }
 ```
 ### Get your USDC balance over a period of time
 ```hcl
-contract usdc_balance "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8" {
-  abi = "erc20.abi.json"
+query usdc_balance {
+  chain = "ethereum"
+  
+  contract usdc_balance "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8" {
+    abi = "erc20.abi.json"
 
-  method balanceOf {
-    // Inputs should be defined as a map.
-    inputs = {
-      address = "0xe1Dd30fecAb8a63105F2C035B084BfC6Ca5B1493"
+    method balanceOf {
+      // Inputs should be defined as a map.
+      inputs = {
+        address = "0xD3ADBEEF"
+      }
+
+      outputs = ["balance"]
     }
 
-    outputs = ["balance"]
   }
-
   save {
+    time = timestamp
     account = address
     account_balance = parse_decimals(balance, 18)
   }
