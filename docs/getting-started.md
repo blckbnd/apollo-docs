@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 ---
-# Getting Started
+# Getting started
 ## Installation
 ### Debian-based Linux
 Install with `apt`:

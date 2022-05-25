@@ -1,4 +1,4 @@
-# Schema Examples
+# Schema examples
 Here you can find some example schemas to get you started.
 
 ## Events
@@ -143,7 +143,7 @@ query usdc_eth_mid_price {
 query usdc_balance {
   chain = "ethereum"
   
-  contract usdc_balance "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8" {
+  contract "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8" {
     abi = "erc20.abi.json"
 
     method balanceOf {
@@ -154,9 +154,11 @@ query usdc_balance {
 
       outputs = ["balance"]
     }
-
   }
+
+  // Transform block is optional, we can also proceed straight to the save block
   save {
+    block = blocknumber
     time = timestamp
     account = address
     account_balance = parse_decimals(balance, 18)

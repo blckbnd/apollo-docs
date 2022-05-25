@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Introduction
 The schema is in the form of a DSL implemented with [HCL](https://github.com/hashicorp/hcl) to define the data
 we're interested in. This means that basic arithmetic operations and ternary operators
@@ -37,7 +40,7 @@ filter for events in one query (unless you're calling a method when a certain ev
 This is where things become interesting. Inside of the `query` block we can choose between a couple of options: **global events**
 and **contracts**. Let's start with the first.
 
-### Global Event
+### Global Events
 If we want to query certain events that are not tied to a specific address, we create an `event` block inside of the `query` block.
 For example:
 ```hcl
@@ -54,7 +57,7 @@ query all_arbitrum_transfers {
 This query would look for all of the ERC20 `Transfer` events that happen on the **Arbitrum** rollup. Since `Transfer` is
 defined in the ERC20 ABI, we need a property inside `event` to specify the ABI.
 
-### Contract
+### Contracts
 The other option is a `contract` block. This allows you to **call methods** or **filter events** that are tied to a specific
 contract. For example:
 ```hcl
@@ -114,8 +117,10 @@ further processing.
 We've talked a lot about **how** we're supposed to get our data, now let's see **what** we can do with it.
 ### Transform
 `contract` and global `event` blocks can have additional `transform` blocks. These blocks can work with previously fetched
-data to do some transformations, before proceeding to the final output. I think this can best be explained with an example.
-In the previous example where we're recording `Swap` events on the USDC-WETH pool, the outputs we're getting are very raw.
+data to do some transformations, before proceeding to the final output. Any `input` and `output` is automatically provided
+as a variable to work with, along with some helper functions like `parse_decimals()`. More on this 
+[here](./context-variables-functions.md). Let's look at an example to make this all clear.
+In the previous example when recording `Swap` events on the USDC-WETH pool, the outputs we're getting are very raw.
 For one, they're formatted according to the number of decimals of the token, which is not a great format to work with.
 Let's say we want to change that:
 ```hcl
@@ -149,17 +154,69 @@ is always USDC, which has 6 decimals. Anything with the number `0` is WETH, with
 
 We can also define a `buy` boolean, which will keep track of wether the swap bought or sold WETH.
 
-### Save (TODO)
-Any `input` or `output` is provided as a variable by default.
-Other variables available are:
-* `timestamp`
-* `blocknumber`
-* `contract_address`
+### Filter (TODO)
 
-And for `events`:
-* `tx_hash`
+### Save
+Our last block is the `save` block. This block is at the **query** level, and it defines the final output format of our data.
+Everything that passes our `filter` is available for use, including any transformed variables.
 
-The available functions are:
-* `lower(str)`
-* `upper(str)`
-* `parse_decimals(raw, decimals)`
+We'll continue to build on the previous example:
+```hcl
+// Note the variables!
+variables = {
+  b = upper("eth_buy")
+  s = upper("eth_sell")
+}
+
+query usdc_eth_swaps {
+  chain = "arbitrum"
+
+  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+    abi = "unipair.abi.json"
+
+    event Swap {
+      outputs = ["amount1In", "amount0Out", "amount0In", "amount1Out"]
+    }
+
+    transform {
+      usdc_sold = parse_decimals(amount1In, 6)
+      eth_sold = parse_decimals(amount0In, 18)
+
+      usdc_bought = parse_decimals(amount1Out, 6)
+      eth_bought = parse_decimals(amount0Out, 18)
+
+      buy = amount0Out != 0
+    }
+  }
+
+  save {
+    timestamp = timestamp
+    block = blocknumber
+    contract = contract_address
+    tx_hash = tx_hash
+
+    // Example: we want to calculate the price of the swap.
+    // We have to make sure we don't divide by 0, so we use the ternary operator.
+    swap_price = eth_bought != 0 ? (usdc_sold / eth_bought) : (usdc_bought / eth_sold)
+    direction = buy ? b : s
+    size_in_udsc = eth_bought != 0 ? usdc_sold : usdc_bought
+  }
+}
+```
+If we choose CSV as the output option, this would produce something like this:
+```csv title="usdc_eth_swaps.csv"
+size_in_udsc,timestamp,block,contract,tx_hash,swap_price,direction
+70.471237,1653105492,12604569,0x905dfCD5649217c42684f23958568e533C711Aa3,0x92da0717731b067a28663c3053998af4ca9d39164ea96024054688d5febbdfb5,1954.052675,ETH_SELL
+7831.683925,1653100138,12600500,0x905dfCD5649217c42684f23958568e533C711Aa3,0xec90864ecd0d6e8eb40bf059fd3c5d44e268871f6632fee6024a70409d24821e,1957.920981,ETH_BUY
+1508.127957,1653101447,12601445,0x905dfCD5649217c42684f23958568e533C711Aa3,0x7958274b6d9ce536f7c40f0be8441c3327c8aea788aa6a7a7c615fadd4daa567,1958.898423,ETH_BUY
+590.085622,1653101587,12601551,0x905dfCD5649217c42684f23958568e533C711Aa3,0xdf5fc5a39bc93a1cbe5480533a70fdb9da44d970c5acb17ec1bad12f01ff02a0,1959.289088,ETH_BUY
+8,1653100643,12600951,0x905dfCD5649217c42684f23958568e533C711Aa3,0x8f8de8c985a3e1118ec4abfcb3a07935a0d43d921e4d6eee35b3275200099840,1958.978772,ETH_BUY
+```
+
+An important thing to note: the `save` block has access to some additional context variables, and the ones we use
+here are `timestamp`, `blocknumber`, `contract_address`, and `tx_hash`. See 
+[Context variables and functions](./context-variables-functions.md) for more information.
+
+In this example we also make use of the [ternary operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator) to make sure we don't divide by 0, and to determine if the swap bought or sold WETH.
+
+You've made it! If you're curious about some more use cases, check out our [examples](./schema-examples.md).
