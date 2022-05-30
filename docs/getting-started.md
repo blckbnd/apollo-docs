@@ -33,11 +33,12 @@ apollo --realtime --csv
 apollo --realtime --interval 5 --db
 ```
 ### Historical mode
-With historical mode, the only required parameter is an output option. The parameters have to be defined in the schema.
+With historical mode, the only required parameter is an output option. The 
+time parameters have to be defined in the schema.
 
 ## Output
 There are 3 output options:
 * `stdout`: this will just print the results to your terminal.
-* `csv`: this will save your output into a csv file. The name of your file corresponds to the `name` field of your contract schema definition. The other columns are going to be the inputs and outputs fields, also with the names corresponding to the schema.
+* `csv`: this will save your output into a csv file. The name of your file corresponds to the name of your query. 
 * `db`: this will save your output into a Postgres SQL table. The settings are defined in `config.yml` in your `apollo`
 config directory.
