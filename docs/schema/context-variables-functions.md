@@ -22,7 +22,6 @@ sidebar_position: 2
 * `block_hash`
 * `tx_hash` (for events)
 * `tx_index` (for events)
-* `tx_sender` (for events)
 
 #### Functions
 * `parse_decimals(raw, decimals)`

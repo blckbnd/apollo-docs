@@ -154,13 +154,52 @@ is always USDC, which has 6 decimals. Anything with the number `0` is WETH, with
 
 We can also define a `buy` boolean, which will keep track of wether the swap bought or sold WETH.
 
-### Filter (TODO)
+### Filter
+Before proceeding to our final block, we can filter out for results we're not interested in. We do this in the `filter`
+list. Let's say we're only looking for ETH buys, and don't want to save the sells:
+```hcl
+query usdc_eth_swaps {
+  chain = "arbitrum"
+
+  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+    abi = "unipair.abi.json"
+
+    event Swap {
+      outputs = ["amount1In", "amount0Out", "amount0In", "amount1Out"]
+    }
+
+    transform {
+      usdc_sold = parse_decimals(amount1In, 6)
+      eth_sold = parse_decimals(amount0In, 18)
+
+      usdc_bought = parse_decimals(amount1Out, 6)
+      eth_bought = parse_decimals(amount0Out, 18)
+    }
+  }
+
+  filter = [
+    amount0Out != 0
+  ]
+
+  save {
+    timestamp = timestamp
+    block = blocknumber
+    contract = contract_address
+    tx_hash = tx_hash
+
+    // Example: we want to calculate the price of the swap.
+    swap_price = usdc_sold / eth_bought
+    size_in_udsc = usdc_sold
+  }
+}
+```
+If there's anything in the `filter` list that evaluates to `false`, the result will be discarded.
 
 ### Save
 Our last block is the `save` block. This block is at the **query** level, and it defines the final output format of our data.
 Everything that passes our `filter` is available for use, including any transformed variables.
 
-We'll continue to build on the previous example:
+We'll continue to build on the previous example (but without any filters):
 ```hcl
 // Note the variables!
 variables = {

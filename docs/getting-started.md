@@ -3,17 +3,10 @@ sidebar_position: 2
 ---
 # Getting started
 ## Installation
-### Debian-based Linux
-Install with `apt`:
+### With Go
 ```bash
-sudo apt-get install apollo
+go install github.com/chainbound/apollo
 ```
-
-### MacOS
-TODO
-
-### Windows
-TODO
 
 ## Setting up
 First, generate the config directory and files:
@@ -27,34 +20,20 @@ contract ABIs.
 
 ## Running
 ### Realtime mode
+By default, `apollo` will be running in historical mode, according to the parameters defined in the schema.
+To run it in realtime mode, pass the `--realtime` flag.
 In realtime mode, we only have to define the interval if we're doing a method calling schema (in seconds) and the chain, 
 and an optional output option (either `--csv`, `--db` or `--stdout`). See the [Output](##Output) for more info on that.
-
-**Examples**
-
-* Run a method calling schema every 5 seconds in realtime on Arbitrum, and save the results in a csv
+* **Example**: Run an event schema in realtime and save the output in a CSV file:
+```bash
+apollo --realtime --csv
 ```
-apollo --realtime --interval 5 --csv
+* **Example**: Run a method calling schema every 5 seconds, save the result in a database:
+```bash
+apollo --realtime --interval 5 --db
 ```
-* Run an event collecting schema in realtime on Ethereum, save the results in a database
-```
-apollo --realtime --db
-```
-
 ### Historical mode
-In historical mode, we define the start and end blocks, the chain, the interval (when we're doing method calls),
-and an optional output option.
-
-**Examples**
-
-* Run a method calling schema every 100 blocks with a start and end block on Arbitrum, and save the results in a DB and a csv
-```
-apollo --start-block 1000000 --end-block 1200000 --interval 100 --csv --db
-```
-* Run an event collecting schema over a range of blocks on Polygon, and output the results to `stdout`
-```
-apollo --start-block 1000000 --end-block 1500000 --stdout
-```
+With historical mode, the only required parameter is an output option. The parameters have to be defined in the schema.
 
 ## Output
 There are 3 output options:

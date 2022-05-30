@@ -2,7 +2,7 @@
 Here you can find some example schemas to get you started.
 
 ## Events
-### ETH-USDC swap price vs. mid price
+### Uniswap V2 ETH-USDC swap price vs. mid price
 This example gets the swap price of every Swap event on the ETH-USDC
 Sushiswap pool. It also fetches the reserves at the previous block, to
 calculate the mid price before the swap. Note that events are at the transaction level,
@@ -72,7 +72,45 @@ query usdc_eth_swaps {
   }
 }
 ```
-### Record every ERC20 transfer, and parse the value
+### Uniswap V3 ETH-USDC fee per swap
+```hcl
+query "usdc_eth_fees_3000" {
+  chain = "ethereum"
+
+  contract "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8" {
+    abi = "uni_v3_pool.abi.json"
+
+    event "Swap" {
+      outputs = ["sender", "recipient", "amount0", "amount1", "liquidity", "tick"]
+    }
+
+    transform {
+      eth_amount = parse_decimals(amount1, 18)
+      usdc_amount = parse_decimals(amount0, 6)
+    }
+  }
+
+  save {
+    timestamp = timestamp
+    block = blocknumber
+    tx = tx_hash
+
+    eth_amount = eth_amount
+    usdc_amount = usdc_amount
+    liquidity = liquidity
+    tick = tick
+
+    sender = sender
+    recipient = recipient
+
+    // Calculate the swap fee in USDC (0.3% fee tier)
+    lp_fee = abs(0.003 * usdc_amount)
+
+    type = eth_amount < 0 ? "ETH_SELL" : "ETH_BUY"
+  }
+}
+```
+### Record every ERC20 transfer
 ```hcl
 query arbitrum_transfers {
   chain = "arbitrum"
