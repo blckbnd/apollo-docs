@@ -178,7 +178,7 @@ query usdc_eth_swaps {
   }
 
   filter = [
-    amount0Out != 0
+    eth_bought != 0
   ]
 
   save {
