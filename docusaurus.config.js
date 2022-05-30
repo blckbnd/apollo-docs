@@ -41,10 +41,7 @@ const config = {
           // editUrl:
           //   'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
-        blog: {
-          blogTitle: 'Apollo blog',
-          postsPerPage: 'ALL',
-        },
+        blog: false,
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
@@ -59,13 +56,8 @@ const config = {
         title: 'Apollo Docs',
         logo: {
           alt: 'My Site Logo',
-          src: 'img/logo.svg',
+          // src: 'img/logo.svg',
         },
-        items: [
-          {
-            to: 'blog', label: 'Blog', position: 'left'
-          },
-        ],
       },
       footer: {
         style: 'dark',
