@@ -54,10 +54,10 @@ const config = {
     ({
       navbar: {
         title: 'Apollo Docs',
-        logo: {
-          alt: 'My Site Logo',
-          // src: 'img/logo.svg',
-        },
+        // logo: {
+        //   alt: 'My Site Logo',
+        // src: 'img/logo.svg',
+        // },
       },
       footer: {
         style: 'dark',
