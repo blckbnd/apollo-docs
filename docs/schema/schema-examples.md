@@ -2,6 +2,18 @@
 Here you can find some example schemas to get you started.
 
 ## Events
+:::info
+When filtering events, **start** and **end** parameters are required. These schema's could start with
+```hcl
+start_time = format_date("02-01-2006 15:04", "01-05-2022 00:00")
+end_time = format_date("02-01-2006 15:04", "31-05-2022 00:00")
+```
+or 
+```hcl
+start_block = 13400000
+end_block = 13500000
+```
+:::
 ### Uniswap V2 ETH-USDC swap price vs. mid price
 This example gets the swap price of every Swap event on the ETH-USDC
 Sushiswap pool. It also fetches the reserves at the previous block, to
@@ -73,7 +85,9 @@ query usdc_eth_swaps {
   }
 }
 ```
-### Uniswap V3 ETH-USDC fee per swap
+### Per-swap fees on Uniswap V3
+In this example we calculate every swap fee in USDC on the Uniswap V3 WETH-USDC pool (0.3% fee tier).
+We do this on Ethereum mainnet. We also note whether the swap bought of sold ETH.
 ```hcl
 query "usdc_eth_fees_3000" {
   chain = "ethereum"
@@ -112,43 +126,70 @@ query "usdc_eth_fees_3000" {
   }
 }
 ```
-### Record every ERC20 transfer
+### Record every ERC20 transfer on Ethereum and Arbitrum
+This is an example of where a loop would come in handy. We also call `decimals()` on the contract
+because we want to save the parsed value, and we filter out `0` values. Note that in this case
+it's recommended to save the `chain`, since you otherwise won't be able to determine on which chain the
+transfer took place.
 ```hcl
-query arbitrum_transfers {
-  chain = "arbitrum"
+loop {
+  items = ["arbitrum", "ethereum"]
 
-  event Transfer {
-    abi = "erc20.abi.json"
+  query arbi_eth_transfers {
+    chain = item
 
-    outputs = [
-      "from",
-      "to",
-      "value"
+    event Transfer {
+      abi = "erc20.abi.json"
+
+      outputs = ["from", "to", "value"]
+
+      method decimals {
+        outputs = ["decimals"]
+      }
+
+      transform {
+        value = parse_decimals(value, decimals)
+      }
+    }
+
+    filter = [
+      value != 0
     ]
 
-    // Because it could be any ERC20 transfer, we don't
-    // know the decimals in advance and need to call them.
-    // The code would somehow need to know that it should call this on
-    // the contract that emitted the event.
-    method decimals {
-      outputs = ["decimals"]
+    save {
+      chain = chain
+      block = blocknumber
+      timestamp = timestamp
+      tx_hash = tx_hash
+
+      from = from
+      to = to
+      value = value
     }
-
-
-    transform {
-      amount_parsed = parse_decimals(value, decimals)
-    }
-  }
-
-  save {
-    sender = from
-    receiver = to
-    amount = amount_parsed
   }
 }
 ```
 ## Methods
-### Calculate the mid price of a Uniswap V2 pool
+:::info
+When calling methods, an **interval**, along with **start** and **end** parameters is mandatory, otherwise
+`apollo` won't know when to call the methods. An example start of the following schema's would be
+```hcl
+start_time = format_date("02-01-2006 15:04", "01-06-2022 16:10")
+end_time = now
+// Call method every 30s. This will be converted to an estimated block interval.
+time_interval = 30
+```
+or
+```hcl
+start_block = 13400000
+end_block = 13500000
+// Call every 100 blocks.
+block_interval = 100
+```
+:::
+### Mid price of Uniswap V2 pools
+This example shows you how to calculate the mid price of a Uniswap V2 pool using the reserves.
+We do this for the WETH-USDC pool on Arbitrum.
 ```hcl
 query usdc_eth_mid_price {
   chain = "arbitrum"
@@ -179,31 +220,41 @@ query usdc_eth_mid_price {
   }
 }
 ```
-### Get your USDC balance over a period of time
+### Query token balance
+In this example we first define some variabels for later use, and then query our USDC balance
+on Ethereum mainnet. The custom function `token_balance(owner, token)` returns the parsed balance.
 ```hcl
+// Define variables for later use
+variables = {
+  owner = "0xDeAdB33F"
+  usdc = "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8"
+}
+
 query usdc_balance {
   chain = "ethereum"
-  
-  contract {
-    address = "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8" 
-    abi = "erc20.abi.json"
 
-    method balanceOf {
-      // Inputs should be defined as a map.
-      inputs = {
-        address = "0xD3ADBEEF"
-      }
-
-      outputs = ["balance"]
-    }
-  }
-
-  // Transform block is optional, we can also proceed straight to the save block
+  // Previous blocks are optional, we can just skip straight to the save block
   save {
     block = blocknumber
     time = timestamp
-    account = address
-    account_balance = parse_decimals(balance, 18)
+    account = owner
+    // Custom helper function which returns the parsed ERC20 balance
+    account_balance = token_balance(owner, usdc)
+  }
+}
+```
+### Query native balance
+If you want to query your native balance on a specific chain, let's say `avax`, you would use the
+`balance(owner)` helper function.
+```hcl
+query avax_balance {
+  chain = "avax"
+
+  save {
+    block = blocknumber
+    time = timestamp
+
+    account_balance = balance("0xDeAdB33F")
   }
 }
 ```
