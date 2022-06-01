@@ -64,7 +64,8 @@ contract. For example:
 query usdc_eth_reserves {
   chain = "arbitrum"
 
-  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+  contract {
+    address = "0x905dfCD5649217c42684f23958568e533C711Aa3"
     abi = "unipair.abi.json"
 
     ...
@@ -78,7 +79,8 @@ Building on the last example, let's see how we can call `getReserves` and define
 query usdc_eth_reserves {
   chain = "arbitrum"
 
-  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+  contract {
+    address = "0x905dfCD5649217c42684f23958568e533C711Aa3"
     abi = "unipair.abi.json"
 
     method getReserves {
@@ -99,7 +101,8 @@ Contract level events are almost the same as global events, but there's no need 
 query usdc_eth_swaps {
   chain = "arbitrum"
 
-  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+  contract {
+    address = "0x905dfCD5649217c42684f23958568e533C711Aa3"
     abi = "unipair.abi.json"
 
     event Swap {
@@ -127,7 +130,8 @@ Let's say we want to change that:
 query usdc_eth_swaps {
   chain = "arbitrum"
 
-  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+  contract {
+    address = "0x905dfCD5649217c42684f23958568e533C711Aa3"
     abi = "unipair.abi.json"
 
     event Swap {
@@ -161,7 +165,8 @@ list. Let's say we're only looking for ETH buys, and don't want to save the sell
 query usdc_eth_swaps {
   chain = "arbitrum"
 
-  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+  contract {
+    address = "0x905dfCD5649217c42684f23958568e533C711Aa3"
     abi = "unipair.abi.json"
 
     event Swap {
@@ -210,7 +215,8 @@ variables = {
 query usdc_eth_swaps {
   chain = "arbitrum"
 
-  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+  contract {
+    address = "0x905dfCD5649217c42684f23958568e533C711Aa3"
     abi = "unipair.abi.json"
 
     event Swap {

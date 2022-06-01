@@ -8,15 +8,15 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Apollo Docs',
   tagline: 'Documentation for Apollo',
-  url: 'https://blckbnd.github.io',
-  baseUrl: '/apollo-docs/',
+  url: 'https://apollo.chainbound.io',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'blckbnd', // Usually your GitHub org/user name.
+  organizationName: 'chainbound', // Usually your GitHub org/user name.
   projectName: 'apollo-docs', // Usually your repo name.
   deploymentBranch: 'gh-pages',
 

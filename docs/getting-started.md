@@ -21,17 +21,10 @@ contract ABIs.
 ## Running
 ### Realtime mode
 By default, `apollo` will be running in historical mode, according to the parameters defined in the schema.
-To run it in realtime mode, pass the `--realtime` flag.
-In realtime mode, we only have to define the interval if we're doing a method calling schema (in seconds) and the chain, 
-and an optional output option (either `--csv`, `--db` or `--stdout`). See the [Output](##Output) for more info on that.
-* **Example**: Run an event schema in realtime and save the output in a CSV file:
-```bash
-apollo --realtime --csv
-```
-* **Example**: Run a method calling schema every 5 seconds, save the result in a database:
-```bash
-apollo --realtime --interval 5 --db
-```
+To run it in realtime mode, pass the `--realtime` flag, along with an
+output option (either `--csv`, `--db` or `--stdout`). See the [Output](##Output) for more info on that.
+The time parameters will be defined in the schema.
+
 ### Historical mode
 With historical mode, the only required parameter is an output option. The 
 time parameters have to be defined in the schema.

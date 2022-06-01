@@ -13,8 +13,9 @@ of the target block).
 query usdc_eth_swaps {
   chain = "arbitrum"
 
-  // specify the contract address
-  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+  contract {
+    // specify the contract address
+    address = "0x905dfCD5649217c42684f23958568e533C711Aa3" 
     // contract needs an ABI
     abi = "unipair.abi.json"
 
@@ -77,7 +78,8 @@ query usdc_eth_swaps {
 query "usdc_eth_fees_3000" {
   chain = "ethereum"
 
-  contract "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8" {
+  contract {
+    address = "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8" 
     abi = "uni_v3_pool.abi.json"
 
     event "Swap" {
@@ -151,7 +153,8 @@ query arbitrum_transfers {
 query usdc_eth_mid_price {
   chain = "arbitrum"
 
-  contract "0x905dfCD5649217c42684f23958568e533C711Aa3" {
+  contract {
+    address = "0x905dfCD5649217c42684f23958568e533C711Aa3" 
     abi = "unipair.abi.json"
 
     // Call methods
@@ -181,7 +184,8 @@ query usdc_eth_mid_price {
 query usdc_balance {
   chain = "ethereum"
   
-  contract "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8" {
+  contract {
+    address = "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8" 
     abi = "erc20.abi.json"
 
     method balanceOf {
