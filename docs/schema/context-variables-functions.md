@@ -11,6 +11,9 @@ sidebar_position: 2
 * `parse_decimals(raw, decimals)`
 * `upper(str)`
 * `lower(str)`
+* `abs(num)`
+* `balance(address)`
+* `token_balance(address, token)`
 
 ### `save` block
 #### Variables
@@ -27,3 +30,6 @@ sidebar_position: 2
 * `parse_decimals(raw, decimals)`
 * `upper(str)`
 * `lower(str)`
+* `abs(num)`
+* `balance(address)`
+* `token_balance(address, token)`
