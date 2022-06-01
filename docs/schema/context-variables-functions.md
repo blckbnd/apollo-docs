@@ -19,6 +19,7 @@ sidebar_position: 2
 #### Variables
 * Any `input` or `output` of methods and events
 * Any variable from `transform`
+* `chain`
 * `blocknumber`
 * `timestamp`
 * `contract_address`
