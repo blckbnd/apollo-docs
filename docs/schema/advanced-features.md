@@ -87,3 +87,7 @@ loop {
   }
 }
 ```
+## Custom Helper Functions
+For some very common operations, `apollo` has helper functions. For now, these are
+limited to `balance`, for getting native balances, and `token_balance`, for getting
+ERC20 token balances. See some examples [here](./schema-examples.md#query-native-balance)
