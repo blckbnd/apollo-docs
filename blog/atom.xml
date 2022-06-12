@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://apollo.chainbound.io/blog</id>
     <title>Apollo Docs Blog</title>
-    <updated>2022-06-12T15:26:55.000Z</updated>
+    <updated>2022-06-12T15:34:06.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://apollo.chainbound.io/blog"/>
     <subtitle>Apollo Docs Blog</subtitle>
@@ -11,7 +11,7 @@
         <title type="html"><![CDATA[Coming Soon]]></title>
         <id>coming-soon</id>
         <link href="https://apollo.chainbound.io/blog/coming-soon"/>
-        <updated>2022-06-12T15:26:55.000Z</updated>
+        <updated>2022-06-12T15:34:06.000Z</updated>
         <author>
             <name>Jonas Bostoen</name>
             <uri>https://github.com/jonasbostoen</uri>
