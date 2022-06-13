@@ -21,7 +21,7 @@ We believe that the best way to introduce a tool like this is to show its value 
 Inspired by [this tweet](https://twitter.com/boredGenius/status/1533531858591309824), we set about analyzing
 the usage of the new [ERC4626 Tokenized Vault Standard](https://eips.ethereum.org/EIPS/eip-4626) across
 multiple chains. If you would like to explore more chains, at the
-end of the article you will be able to do that yourself, because **Apollo will be open source**.
+end of the article you will be able to do that yourself, because we are open-sourcing Apollo along with this article.
 
 ## What is ERC4626?
 ERC4626 is a new token standard aims to clear up the problems with having different implementations of tokenized vaults.
@@ -90,7 +90,7 @@ give you an introduction as to how Apollo can be used.
 This is the game plan: we are going to collect every ERC4626 `Deposit` event (see above) across
 the chains, from February 1st until June 10th. The problem is that the `Deposit` event signature
 is not unique to the ERC4626 event, because it is derived from the event name and its types.
-So to filter out the correct events, we can call `asset` and `totalAssets` on the contract for which the event was emitted.
+So to filter out the correct events, we can call `asset` on the contract for which the event was emitted.
 This is something that Apollo can do, and if the call reverts (which means that contract doesn't adhere to
 the standard), we just move on. These outputs will also be useful in our analysis.
 
