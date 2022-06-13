@@ -1,11 +1,11 @@
 jonas:
   name: Jonas Bostoen
-  title: Co-founder & CTO @ Chainbound
+  # title: Co-founder & CTO @ Chainbound
   url: https://github.com/jonasbostoen
   image_url: https://github.com/jonasbostoen.png
 
 francesco:
   name: Francesco Mosterts
-  title: Co-founder & CEO @ Chainbound
+  # title: Co-founder & CEO @ Chainbound
   url: https://github.com/fmosterts
   image_url: https://github.com/fmosterts.png
