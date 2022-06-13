@@ -1,0 +1,150 @@
+---
+slug: erc4626-usage
+title: "Introducing Apollo: analyzing the usage of ERC4626 across chains"
+authors: [jonas, francesco]
+tags: [apollo, erc4626, tutorial]
+---
+
+## Introduction
+For the last few months, we've been workig on [Apollo](https://github.com/chainbound/apollo) 
+([docs](https://apollo.chainbound.io)), a tool
+to make it easy for anyone to **query**, **filter**, **transform** and **save** EVM chaindata based on a schema.
+
+We built Apollo because we needed to be able to scrape obscure EVM chaindata fast, and the tools currently out there
+were too limiting in what they could do. They either run only on a couple chains, or rely on indexing, which is a process
+that takes time and is not feasable for just any protocol. **Apollo** interacts directly with the standardized
+[JSON RPC API](https://eth.wiki/json-rpc/API) that any EVM node implementation should expose. This means that
+as long as you have a JSON RPC API for your chain, **Apollo will be able to run there**. The only thing
+you need is an [ABI](https://www.quicknode.com/guides/solidity/what-is-an-abi).
+
+We believe that the best way to introduce a tool like this is to show its value in a **real world example**.
+Inspired by [this tweet](https://twitter.com/boredGenius/status/1533531858591309824), we set about analyzing
+the usage of the new [ERC4626 Tokenized Vault Standard](https://eips.ethereum.org/EIPS/eip-4626) across
+multiple chains. If you would like to explore more chains, at the
+end of the article you will be able to do that yourself, because **Apollo will be open source**.
+
+## What is ERC4626?
+ERC4626 is a new token standard aims to clear up the problems with having different implementations of tokenized vaults.
+One of the most powerful mechanisms in DeFi is **composability**, but composability doesn't work without standards. If you know 
+[ERC20](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/) (token standard) or 
+[ERC721](https://ethereum.org/en/developers/docs/standards/tokens/erc-721/) (NFT standard), you know how crucial they are. One of the more important products in DeFi are yield-bearing tokenized
+vaults. If you've ever staked Sushi in return for xSushi, or deposited ETH on Aave and received aETH, you've used these products.
+They represent shares of an underlying token that generate interest over time.
+The problem is that when building applications that can integrate with these tokens, you have to build an integration for each
+separate implementation. This is complex, error-prone, and resource intensive, resulting in less applications actually doing it. **Bad for composability**.
+
+ERC4626 aims to set a standard for these products called the Tokenized Vault Standard. 
+If an application works with ERC4626, it works with any yield-bearing token that 
+implements the standard. This will drastically lower the integration effort and will enable a renaissance in DeFi.
+It will, for example, provide lending platforms the ability to easily accept any ERC4626 token as collateral,
+which would be one example of **composable yield**.
+
+Let's take a look at some of the events and methods of the interface (incomplete), because 
+these will be useful later.
+```sol title="ierc20.sol"
+abstract contract IERC4626 is ERC20 {
+    // Emitted every time someone deposits
+    event Deposit(address indexed sender, address indexed receiver, uint256 assets, uint256 shares);
+
+    // Emitted every time someone withdraws
+    event Withdraw(address indexed sender, address indexed receiver, uint256 assets, uint256 shares);
+
+    // Returns the address of the underlying token
+    function asset() external view virtual returns (address asset);
+
+    // Returns the amount of assets managed by the vault
+    function totalAssets() external view virtual returns (uint256 totalAssets);
+
+    // Mints `shares` vault tokens by depositing exactly `assets` underlying assets
+    function deposit(uint256 assets, address receiver) external virtual returns (uint256 shares);
+
+    // Mints exactly `shares` vault tokens by depositing `assets` underlying assets
+    function mint(uint256 shares, address receiver) external virtual returns (uint256 assets);
+
+    // Redeems `shares` from `assets`
+    function withdraw(
+        uint256 assets,
+        address receiver,
+        address owner
+    ) external virtual returns (uint256 shares);
+
+    // Redeems `shares` from `assets`
+    function redeem(
+        uint256 shares,
+        address receiver,
+        address owner
+    ) external virtual returns (uint256 assets);
+
+    // Other view functions omitted
+    ...
+}
+```
+
+## Analysis
+Since we believe ERC4626 will be a very important building block in future DeFi protocols, we wanted to analyze its usage.
+Partly because we live in a multi-chain world, and partly because we want to highlight a competitive feature that **Apollo** has,
+we will be looking at 4 chains: **Ethereum**, **Polygon**, **Arbitrum** and **Optimism**. This analysis is also meant to 
+give you an introduction as to how Apollo can be used.
+
+### Apollo workflow
+This is the game plan: we are going to collect every ERC4626 `Deposit` event (see above) across
+the chains, from February 1st until June 10th. The problem is that the `Deposit` event signature
+is not unique to the ERC4626 event, because it is derived from the event name and its types.
+So to filter out the correct events, we can call `asset` and `totalAssets` on the contract for which the event was emitted.
+This is something that Apollo can do, and if the call reverts (which means that contract doesn't adhere to
+the standard), we just move on. These outputs will also be useful in our analysis.
+
+Since we will be running on 4 chains, we can best use a `loop` and run them all at the same time instead of
+separately. This is the schema we'll be running:
+```hcl title="schema.hcl"
+start_time = format_date("02-01-2006 15:04", "01-02-2022 00:00")
+end_time = now
+
+loop {
+  items = ["ethereum", "polygon", "arbitrum", "optimism"]
+
+  query "erc4626_deposits" {
+    chain = item
+
+    event "Deposit" {
+      abi = "erc4626.abi.json"
+      outputs = ["caller", "owner", "assets", "shares"]
+
+      // This will revert if the contract does not have
+      // this method (required in the ERC4626 standard)
+      method "asset" {
+        outputs = ["asset"]
+      }
+
+      method "decimals" {
+        outputs = ["decimals"]
+      }
+
+      method "symbol" {
+        outputs = ["symbol"]
+      }
+    }
+
+    save {
+      block = blocknumber
+      time = timestamp
+      contract = contract_address
+      tx = tx_hash
+      chain = chain
+
+      underlying = asset
+      caller = caller
+      owner = owner
+      assets = parse_decimals(assets, decimals)
+      shares = parse_decimals(shares, decimals)
+      symbol = symbol
+    }
+  }
+}
+```
+
+### Results
+
+
+## References
+1. https://decrypt.co/99695/how-erc-4626-could-fuel-next-wave-of-defi
