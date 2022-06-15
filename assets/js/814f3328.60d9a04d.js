@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkapollo_docs=self.webpackChunkapollo_docs||[]).push([[535],{5641:function(e){e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"Introducing Apollo: analyzing the usage of ERC4626 across chains","permalink":"/blog/erc4626-usage"}]}')}}]);

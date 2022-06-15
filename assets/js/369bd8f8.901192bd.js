@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkapollo_docs=self.webpackChunkapollo_docs||[]).push([[391],{5650:function(o){o.exports=JSON.parse('{"permalink":"/blog/tags/tutorial","page":1,"postsPerPage":1,"totalPages":1,"totalCount":1,"blogDescription":"Blog","blogTitle":"Apollo blog"}')}}]);

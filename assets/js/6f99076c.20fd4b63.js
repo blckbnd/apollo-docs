@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkapollo_docs=self.webpackChunkapollo_docs||[]).push([[742],{9903:function(l){l.exports=JSON.parse('{"label":"erc4626","permalink":"/blog/tags/erc-4626","allTagsPath":"/blog/tags","count":1}')}}]);
