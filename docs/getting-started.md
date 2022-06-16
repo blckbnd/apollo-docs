@@ -29,6 +29,16 @@ The time parameters will be defined in the schema.
 With historical mode, the only required parameter is an output option. The 
 time parameters have to be defined in the schema.
 
+### Rate limiting
+:::warning
+Most API providers will rate-limit you start with the default parameters.
+:::
+Apollo has a `--rate-limit` option which we highly recommend you use. The default is at **100**,
+which is quite high. In our experience, an option like **20** should work with most providers.
+If you have your own node running, you can crank this number up. 
+When using our own [Erigon](https://github.com/ledgerwatch/erigon) node, we could set it at **500**
+without any problems.
+
 ## Output
 There are 3 output options:
 * `stdout`: this will just print the results to your terminal.
