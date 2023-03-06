@@ -9,7 +9,7 @@ const config = {
   title: 'Apollo Docs',
   tagline: 'Documentation for Apollo',
   url: 'https://apollo.chainbound.io',
-  baseUrl: '/',
+  baseUrl: '/apollo-docs/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
