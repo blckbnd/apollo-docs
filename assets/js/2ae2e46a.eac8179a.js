@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkapollo_docs=self.webpackChunkapollo_docs||[]).push([[238],{9085:function(l){l.exports=JSON.parse('[{"label":"apollo","permalink":"/apollo-docs/blog/tags/apollo","count":1},{"label":"erc4626","permalink":"/apollo-docs/blog/tags/erc-4626","count":1},{"label":"tutorial","permalink":"/apollo-docs/blog/tags/tutorial","count":1}]')}}]);
